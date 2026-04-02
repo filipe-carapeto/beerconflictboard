@@ -64,14 +64,13 @@
 <div class="board" id="board"></div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCRQ3Y-x-D_jKSiYkfGrcxVa3X2QHqX4G8",
-  authDomain: "beer-board-2.firebaseapp.com",
-  projectId: "beer-board-2",
-  storageBucket: "beer-board-2.firebasestorage.app",
-  messagingSenderId: "907342938334",
-  appId: "1:907342938334:web:81dd7ff6fb3d4f7f07c24f"
-};
+  // 🔥 TODO: replace with your Firebase config
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    appId: "YOUR_APP_ID" // ⚠️ REQUIRED
+  };
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
@@ -89,16 +88,74 @@ const firebaseConfig = {
       const total = dev.scratches;
 
       function getTally(n) {
-        let result = '';
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.flexWrap = 'wrap';
+        container.style.gap = '6px';
+
         const groups = Math.floor(n / 5);
         const remainder = n % 5;
 
-        for (let i = 0; i < groups; i++) {
-          result += '||||\\ ';
+        function createGroup(isFull) {
+          const g = document.createElement('div');
+          g.style.position = 'relative';
+          g.style.width = '30px';
+          g.style.height = '20px';
+
+          const lines = isFull ? 4 : remainder;
+
+          for (let i = 0; i < lines; i++) {
+            const line = document.createElement('div');
+            line.style.position = 'absolute';
+            line.style.left = `${i * 6}px`;
+            line.style.top = '0';
+            line.style.width = '2px';
+            line.style.height = '100%';
+            line.style.background = 'white';
+            g.appendChild(line);
+          }
+
+          if (isFull) {
+            const slash = document.createElement('div');
+            slash.style.position = 'absolute';
+            slash.style.left = '0';
+            slash.style.top = '0';
+            slash.style.width = '100%';
+            slash.style.height = '2px';
+            slash.style.background = 'white';
+            slash.style.transform = 'rotate(25deg)';
+            slash.style.transformOrigin = 'left center';
+            g.appendChild(slash);
+          }
+
+          return g;
         }
 
-        result += '|'.repeat(remainder);
-        return result;
+        for (let i = 0; i < groups; i++) {
+          container.appendChild(createGroup(true));
+        }
+
+        if (remainder > 0) {
+          const g = document.createElement('div');
+          g.style.position = 'relative';
+          g.style.width = '30px';
+          g.style.height = '20px';
+
+          for (let i = 0; i < remainder; i++) {
+            const line = document.createElement('div');
+            line.style.position = 'absolute';
+            line.style.left = `${i * 6}px`;
+            line.style.top = '0';
+            line.style.width = '2px';
+            line.style.height = '100%';
+            line.style.background = 'white';
+            g.appendChild(line);
+          }
+
+          container.appendChild(g);
+        }
+
+        return container;
       }
 
       const tally = getTally(total);
@@ -108,12 +165,13 @@ const firebaseConfig = {
 
       card.innerHTML = `
         <h3>${dev.name}</h3>
-        <p>Scratches: ${tally}</p>
+        <p>Scratches:</p>
         <p>🍺 Beers earned: ${beers}</p>
         <button onclick="addScratch('${id}')">+ Scratch</button>
         <button onclick="resetDev('${id}')" class="reset">Reset</button>
       `;
 
+      card.appendChild(tally);
       board.appendChild(card);
     });
   }
