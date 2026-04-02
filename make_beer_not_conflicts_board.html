@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>🍺 Make Beer, Not Conflicts</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,9 +14,7 @@
       padding: 20px;
     }
 
-    h1 {
-      color: #f5c542;
-    }
+    h1 { color: #f5c542; }
 
     .board {
       display: flex;
@@ -40,15 +40,8 @@
       cursor: pointer;
     }
 
-    .add {
-      background: #4caf50;
-      color: white;
-    }
-
-    .reset {
-      background: #f44336;
-      color: white;
-    }
+    .add { background: #4caf50; color: white; }
+    .reset { background: #f44336; color: white; }
 
     input {
       padding: 8px;
@@ -71,22 +64,25 @@
 <div class="board" id="board"></div>
 
 <script>
-  const STORAGE_KEY = 'beerBoard';
+  // 🔥 TODO: replace with your Firebase config
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+  };
 
-  function loadData() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  }
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const collection = db.collection('beerBoard');
 
-  function saveData(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
-
-  function render() {
+  function render(snapshot) {
     const board = document.getElementById('board');
-    const data = loadData();
     board.innerHTML = '';
 
-    data.forEach((dev, index) => {
+    snapshot.forEach(doc => {
+      const dev = doc.data();
+      const id = doc.id;
+
       const beers = Math.floor(dev.scratches / 5);
       const scratches = dev.scratches % 5;
 
@@ -97,8 +93,8 @@
         <h3>${dev.name}</h3>
         <p>Scratches: ${'| '.repeat(scratches)}</p>
         <p>🍺 Beers earned: ${beers}</p>
-        <button onclick="addScratch(${index})">+ Scratch</button>
-        <button onclick="resetDev(${index})" class="reset">Reset</button>
+        <button onclick="addScratch('${id}')">+ Scratch</button>
+        <button onclick="resetDev('${id}')" class="reset">Reset</button>
       `;
 
       board.appendChild(card);
@@ -110,29 +106,22 @@
     const name = input.value.trim();
     if (!name) return;
 
-    const data = loadData();
-    data.push({ name, scratches: 0 });
-    saveData(data);
-
+    collection.add({ name, scratches: 0 });
     input.value = '';
-    render();
   }
 
-  function addScratch(index) {
-    const data = loadData();
-    data[index].scratches++;
-    saveData(data);
-    render();
+  function addScratch(id) {
+    const ref = collection.doc(id);
+    ref.update({ scratches: firebase.firestore.FieldValue.increment(1) });
   }
 
-  function resetDev(index) {
-    const data = loadData();
-    data[index].scratches = 0;
-    saveData(data);
-    render();
+  function resetDev(id) {
+    const ref = collection.doc(id);
+    ref.update({ scratches: 0 });
   }
 
-  render();
+  // 🔁 Real-time updates
+  collection.onSnapshot(render);
 </script>
 
 </body>
