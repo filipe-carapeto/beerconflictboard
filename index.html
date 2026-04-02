@@ -86,14 +86,29 @@ const firebaseConfig = {
       const id = doc.id;
 
       const beers = Math.floor(dev.scratches / 5);
-      const scratches = dev.scratches % 5;
+      const total = dev.scratches;
+
+      function getTally(n) {
+        let result = '';
+        const groups = Math.floor(n / 5);
+        const remainder = n % 5;
+
+        for (let i = 0; i < groups; i++) {
+          result += '||||\\ ';
+        }
+
+        result += '|'.repeat(remainder);
+        return result;
+      }
+
+      const tally = getTally(total);
 
       const card = document.createElement('div');
       card.className = 'card';
 
       card.innerHTML = `
         <h3>${dev.name}</h3>
-        <p>Scratches: ${'| '.repeat(scratches)}</p>
+        <p>Scratches: ${tally}</p>
         <p>🍺 Beers earned: ${beers}</p>
         <button onclick="addScratch('${id}')">+ Scratch</button>
         <button onclick="resetDev('${id}')" class="reset">Reset</button>
@@ -123,7 +138,16 @@ const firebaseConfig = {
   }
 
   // 🔁 Real-time updates
-  collection.onSnapshot(render);
+  collection.onSnapshot(
+    (snapshot) => {
+      console.log('🔥 Data received:', snapshot.size);
+      render(snapshot);
+    },
+    (error) => {
+      console.error('❌ Firestore error:', error);
+      alert('Firestore error: ' + error.message);
+    }
+  );
 </script>
 
 </body>
