@@ -64,14 +64,14 @@
 <div class="board" id="board"></div>
 
 <script>
-  // 🔥 TODO: replace with your Firebase config
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    appId: "YOUR_APP_ID" // ⚠️ REQUIRED
-  };
-
+const firebaseConfig = {
+  apiKey: "AIzaSyCRQ3Y-x-D_jKSiYkfGrcxVa3X2QHqX4G8",
+  authDomain: "beer-board-2.firebaseapp.com",
+  projectId: "beer-board-2",
+  storageBucket: "beer-board-2.firebasestorage.app",
+  messagingSenderId: "907342938334",
+  appId: "1:907342938334:web:81dd7ff6fb3d4f7f07c24f"
+};
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   const collection = db.collection('beerBoard');
